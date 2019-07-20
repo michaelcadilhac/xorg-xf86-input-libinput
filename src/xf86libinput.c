@@ -44,6 +44,7 @@
 
 #include "bezier.h"
 #include "draglock.h"
+#include "space2ctrl.h"
 #include "libinput-properties.h"
 
 #ifndef XI86_SERVER_FD
@@ -1520,7 +1521,6 @@ xf86libinput_handle_absmotion(InputInfoPtr pInfo, struct libinput_event_pointer 
 static void
 xf86libinput_handle_button(InputInfoPtr pInfo, struct libinput_event_pointer *event)
 {
-	DeviceIntPtr dev = pInfo->dev;
 	struct xf86libinput *driver_data = pInfo->private;
 	int button;
 	int is_press;
@@ -1535,13 +1535,12 @@ xf86libinput_handle_button(InputInfoPtr pInfo, struct libinput_event_pointer *ev
 		draglock_filter_button(&driver_data->draglock, &button, &is_press);
 
 	if (button && button < 256)
-		xf86PostButtonEvent(dev, Relative, button, is_press, 0, 0);
+          space2ctrlButtonSend(pInfo, button, is_press);
 }
 
 static void
 xf86libinput_handle_key(InputInfoPtr pInfo, struct libinput_event_keyboard *event)
 {
-	DeviceIntPtr dev = pInfo->dev;
 	struct xf86libinput *driver_data = pInfo->private;
 	int is_press;
 	int key = libinput_event_keyboard_get_key(event);
@@ -1552,7 +1551,7 @@ xf86libinput_handle_key(InputInfoPtr pInfo, struct libinput_event_keyboard *even
 	key += XORG_KEYCODE_OFFSET;
 
 	is_press = (libinput_event_keyboard_get_key_state(event) == LIBINPUT_KEY_STATE_PRESSED);
-	xf86PostKeyboardEvent(dev, key, is_press);
+        space2ctrlKeySend(pInfo, key, is_press);
 }
 
 /*
